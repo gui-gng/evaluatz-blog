@@ -1,28 +1,48 @@
-import React from 'react'
-import Articles from '../components/articles'
-import Layout from '../components/layout'
-import { getArticles, getCategories } from '../lib/api'
+import Head from 'next/head'
+import Layout, { siteTitle } from '../components/layout'
+import utilStyles from '../styles/utils.module.css'
+import { getSortedPostsData } from '../lib/posts'
 
-const Home = ({ articles, categories }) => {
+import Link from 'next/link'
+import Date from '../components/date'
+
+
+export default function Home({ allPostsData }) {
   return (
-    <Layout categories={categories}>
-      <div className="uk-section">
-        <div className="uk-container uk-container-large">
-          <h1>Strapi blog</h1>
-          <Articles articles={articles} />
-        </div>
-      </div>
+    <Layout home>
+      <Head>
+        <title>{siteTitle}</title>
+      </Head>
+      <section className={utilStyles.headingMd}>…</section>
+      <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
+        <h2 className={utilStyles.headingLg}>Blog</h2>
+        <ul className={utilStyles.list}>
+          {allPostsData.map(({ id, date, title }) => (
+            <li className={utilStyles.listItem} key={id}>
+              <Link href="/posts/[id]" as={`/posts/${id}`}>
+                <div className={utilStyles.divLink}>
+                  <h4>{title}</h4>
+
+                  <br />
+                  <small className={utilStyles.lightText}>
+                    <Date dateString={date} />
+                  </small>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </Layout>
   )
 }
 
+
 export async function getStaticProps() {
-  const articles = (await getArticles()) || []
-  const categories = (await getCategories()) || []
+  const allPostsData = getSortedPostsData()
   return {
-    props: { articles, categories },
-    unstable_revalidate: 1,
+    props: {
+      allPostsData
+    }
   }
 }
-
-export default Home
